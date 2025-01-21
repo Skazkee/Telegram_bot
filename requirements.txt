@@ -1,6 +1,6 @@
-import tweepy
-import telegram
-import time
+tweepy
+telegram
+time
 
 # Токены и ключи Twitter API
 consumer_key = '****KFmWs4'
