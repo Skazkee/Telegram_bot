@@ -1,0 +1,57 @@
+import tweepy
+import telegram
+import time
+
+# Токены и ключи Twitter API
+consumer_key = '****KFmWs4'
+consumer_secret = '****KFmWs4'
+access_token = '1713999018055921664-ja1LXsUGeZmTvasuoVcLmde1SCwlcz'
+access_token_secret = 'BKvXIBW9jXpz7IZXV9bZjseXl4OW0wBwZvHfVvRh85bC2'
+
+# Инициализация Twitter API
+auth = tweepy.OAuth1UserHandler(consumer_key, consumer_secret, access_token, access_token_secret)
+api = tweepy.API(auth)
+
+# Токен телеграм-бота и ID чата
+telegram_token = '8019272165:AAF4QET_ywe1Ebn7gu9kHBfHj-UiWkZnOnY'
+chat_id = '427213693'
+bot = telegram.Bot(token=telegram_token)
+
+# Список пользователей для отслеживания
+users_to_follow = ['dilaivolodymyr']
+
+# Список слов для фильтрации твитов
+keywords = ['Test']
+
+# Функция для получения последних твитов
+def get_latest_tweets():
+    for user in users_to_follow:
+        tweets = api.user_timeline(screen_name=user, count=5, tweet_mode="extended")  # Получаем последние 5 твитов
+        for tweet in tweets:
+            yield tweet
+
+# Функция для фильтрации твитов по ключевым словам
+def check_for_keywords(tweet):
+    # Преобразуем текст твита в нижний регистр для проверки без учета регистра
+    tweet_text = tweet.full_text.lower()
+    # Проверяем, содержит ли твит хотя бы одно из ключевых слов
+    for keyword in keywords:
+        if keyword.lower() in tweet_text:
+            return True
+    return False
+
+# Функция для отправки сообщений в Telegram
+def send_to_telegram(message):
+    bot.send_message(chat_id=chat_id, text=message)
+
+# Основной цикл
+def main():
+    while True:
+        for tweet in get_latest_tweets():
+            if check_for_keywords(tweet):
+                # Если твит содержит ключевое слово, отправляем его в Telegram
+                send_to_telegram(f"New tweet from {tweet.user.screen_name}: {tweet.full_text}")
+        time.sleep(600)  # Пауза между проверками (например, 10 минут)
+
+if __name__ == "__main__":
+    main()
